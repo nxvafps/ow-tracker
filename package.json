@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1"
+  },
+  "name": "ow-tracker-db",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nxvafps/ow-tracker-db.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nxvafps/ow-tracker-db/issues"
+  },
+  "homepage": "https://github.com/nxvafps/ow-tracker-db#readme",
+  "description": ""
+}
