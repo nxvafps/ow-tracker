@@ -144,9 +144,12 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
   user_id SERIAL PRIMARY KEY,
-  user_name VARCHAR(15),
+  user_name VARCHAR(15) NOT NULL,
   user_main_role INTEGER REFERENCES roles(role_id),
-  user_main_hero INTEGER REFERENCES heroes(hero_id)
+  user_main_hero INTEGER REFERENCES heroes(hero_id),
+  dps_sr INTEGER,
+  support_sr INTEGER,
+  tank_sr INTEGER
 );
 
 INSERT INTO users
@@ -154,3 +157,24 @@ INSERT INTO users
 VALUES
   ('nova', 1, 9),
   ('omby', 2, 17);
+
+-- Create games table
+
+DROP TABLE IF EXISTS games;
+
+CREATE TABLE games (
+  game_id SERIAL PRIMARY KEY,
+  season INTEGER NOT NULL,
+  user_id INTEGER REFERENCES users(user_id) NOT NULL,
+  role_id INTEGER REFERENCES roles(role_id) NOT NULL,
+  map_id INTEGER REFERENCES maps(map_id) NOT NULL,
+  user_score INTEGER NOT NULL,
+  enemy_score INTEGER NOT NULL,
+  result VARCHAR(4)
+);
+
+INSERT INTO games
+  (season, user_id, role_id, map_id, user_score, enemy_score, result)
+VALUES
+  (14, 1, 1, 5, 1, 0, 'win'),
+  (14, 2, 2, 21, 1 ,2, 'loss');

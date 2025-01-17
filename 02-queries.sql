@@ -14,3 +14,6 @@ SELECT * FROM heroes;
 
 \echo '\n All Users:\n'
 SELECT * FROM users;
+
+\echo '\n All Games:\n'
+SELECT * FROM games;
