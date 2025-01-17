@@ -176,5 +176,18 @@ CREATE TABLE games (
 INSERT INTO games
   (season, user_id, role_id, map_id, user_score, enemy_score, result)
 VALUES
-  (14, 1, 1, 5, 1, 0, 'win'),
-  (14, 2, 2, 21, 1 ,2, 'loss');
+  (14, 1, 1, 9, 5, 4, 'win'), --hanaoka
+  (14, 2, 2, 1, 2 ,0, 'win'), --peninsula
+  (14, 1, 1, 18, 2, 3, 'loss'), --new junk city
+  (14, 2, 2, 4, 0, 2, 'loss'), --circuit
+  (14, 1, 1, 20, 2, 1, 'win'), --numbani
+  (14, 2, 2, 5, 1, 0,'win'); --colosseo
+
+  --need to add tables for each game mode
+
+  DROP TABLE IF EXISTS clash_games;
+  DROP TABLE IF EXISTS control_games;
+  DROP TABLE IF EXISTS escort_games;
+  DROP TABLE IF EXISTS flashpoint_games;
+  DROP TABLE IF EXISTS hybrid_games;
+  DROP TABLE IF EXISTS push_games;
