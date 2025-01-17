@@ -3,6 +3,8 @@ CREATE DATABASE overwatch_tracker;
 
 \c overwatch_tracker
 
+-- Create game mode table 
+
 DROP TABLE IF EXISTS game_modes;
 
 CREATE TABLE game_modes (
@@ -19,6 +21,8 @@ VALUES
   ('Flashpoint'),
   ('Hybrid'),
   ('Push');
+
+-- Create map table
 
 DROP TABLE IF EXISTS maps;
 
@@ -62,6 +66,8 @@ VALUES
   ('Throne of Annubis', 1),
   ('Watchpoint: Gibraltar', 3);
 
+-- Create roles table
+
 DROP TABLE IF EXISTS roles;
 
 CREATE TABLE roles (
@@ -75,6 +81,8 @@ VALUES
   ('DPS'),
   ('Support'),
   ('Tank');
+
+-- Create heroes table
 
 DROP TABLE IF EXISTS heroes;
 
@@ -129,6 +137,8 @@ VALUES
   ('Wrecking Ball', 3),
   ('Zarya', 3),
   ('Zenyatta', 2);
+
+-- Create users table
 
 DROP TABLE IF EXISTS users;
 
