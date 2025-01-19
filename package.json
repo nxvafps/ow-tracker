@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "pg": "^8.13.1"
   },
   "name": "ow-tracker-db",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app/listen.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,8 @@
     "url": "https://github.com/nxvafps/ow-tracker-db/issues"
   },
   "homepage": "https://github.com/nxvafps/ow-tracker-db#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
 }

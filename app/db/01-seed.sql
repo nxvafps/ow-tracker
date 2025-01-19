@@ -186,7 +186,7 @@ VALUES
   ('Bastion', 1),
   ('Brigitte', 2),
   ('Cassidy', 1),
-  ('D.VA', 3),
+  ('D.va', 3),
   ('Doomfist', 3),
   ('Echo', 1),
   ('Genji', 1),
