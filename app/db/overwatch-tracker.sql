@@ -1,0 +1,4 @@
+DROP DATABASE IF EXISTS overwatch_tracker_test;
+CREATE DATABASE overwatch_tracker_test;
+DROP DATABASE IF EXISTS overwatch_tracker_development;
+CREATE DATABASE overwatch_tracker_development;

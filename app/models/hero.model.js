@@ -5,10 +5,10 @@ class HeroModel {
     const query = `
       SELECT heroes.hero_name, roles.role_name
       FROM heroes
-      LEFT JOIN roles ON heroes.role_id = roles.role_id;`;
+      JOIN roles ON heroes.role_id = roles.role_id;`;
 
-    const result = await db.query(query);
-    return result.rows;
+    const { rows } = await db.query(query);
+    return rows;
   }
 
   async getHeroByName(heroName) {
@@ -16,19 +16,20 @@ class HeroModel {
     const query = `
       SELECT heroes.hero_name, roles.role_name
       FROM heroes
-      LEFT JOIN roles ON heroes.role_id = roles.role_id
-      WHERE LOWER(heroes.hero_name) = LOWER($1);`;
+      JOIN roles ON heroes.role_id = roles.role_id
+      WHERE LOWER(hero_name) = LOWER($1);`;
 
-    const result = await db.query(query, [formattedName]);
-    return result.rows;
+    const { rows } = await db.query(query, [formattedName]);
+    return rows;
   }
 
   async getHeroesByRole(roleName) {
     const query = `
         SELECT heroes.hero_name, roles.role_name
         FROM heroes
-        LEFT JOIN roles ON heroes.role_id = roles.role_id
-        WHERE LOWER(roles.role_name) = LOWER($1);`;
+        JOIN roles ON heroes.role_id = roles.role_id
+        WHERE LOWER(role_name) = LOWER($1)
+        ORDER BY hero_name;`;
 
     const result = await db.query(query, [roleName]);
     return result.rows;

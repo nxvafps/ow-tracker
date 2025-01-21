@@ -4,13 +4,13 @@ class HeroController {
   async getHero(req, res) {
     try {
       const { heroName } = req.params;
-      const heroData = await heroModel.getHeroByName(heroName);
+      const hero = await heroModel.getHeroByName(heroName);
 
-      if (!heroData.length) {
+      if (!hero.length) {
         return res.status(404).json({ message: "Hero not found" });
       }
 
-      res.json(heroData);
+      res.json({ hero });
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -20,23 +20,25 @@ class HeroController {
   async getAllHeroes(req, res) {
     try {
       const { role } = req.query;
-      let heroData;
+      let heroes;
 
       if (role) {
-        heroData = await heroModel.getHeroesByRole(role);
-        if (!heroData.length) {
-          return res
-            .status(404)
-            .json({ message: "No heroes found for this role" });
+        heroes = await heroModel.getHeroesByRole(role);
+        if (!heroes.length) {
+          return res.status(404).json({
+            message: "No heroes found for this role",
+          });
         }
       } else {
-        heroData = await heroModel.getAllHeroes();
-        if (!heroData.length) {
-          return res.status(404).json({ message: "Heroes not found" });
+        heroes = await heroModel.getAllHeroes();
+        if (!heroes.length) {
+          return res.status(404).json({
+            message: "Heroes not found",
+          });
         }
       }
 
-      res.json(heroData);
+      res.json({ heroes });
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: "Internal server error" });

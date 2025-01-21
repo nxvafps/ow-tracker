@@ -3,6 +3,24 @@ CREATE DATABASE overwatch_tracker;
 
 \c overwatch_tracker
 
+DROP TABLE IF EXISTS control_games;
+DROP TABLE IF EXISTS escort_games;
+DROP TABLE IF EXISTS flashpoint_games;
+DROP TABLE IF EXISTS hybrid_games;
+DROP TABLE IF EXISTS push_games;
+DROP TABLE IF EXISTS clash_games;
+DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS heroes;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS push_details;
+DROP TABLE IF EXISTS escort_details;
+DROP TABLE IF EXISTS hybrid_details;
+DROP TABLE IF EXISTS control_submaps;
+DROP TABLE IF EXISTS maps;
+DROP TABLE IF EXISTS game_modes;
+
+
 -- Create game mode table
 
 CREATE TABLE game_modes (
@@ -281,9 +299,3 @@ INSERT INTO clash_games
   (game_id, hero_id_1, hero_id_2, hero_id_3, team_score, enemy_score)
 VALUES
   (1, 9, null, null, 5, 4);
-
-DROP TABLE IF EXISTS control_games;
-DROP TABLE IF EXISTS escort_games;
-DROP TABLE IF EXISTS flashpoint_games;
-DROP TABLE IF EXISTS hybrid_games;
-DROP TABLE IF EXISTS push_games;
