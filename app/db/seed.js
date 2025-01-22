@@ -1,6 +1,6 @@
 const db = require("./index");
-const format = require("pg-format");
 const { createRoles, createHeroes, createMaps } = require("./manage-tables");
+const { insertRoles, insertHeroes, insertMaps } = require("./insert-data");
 const formatHeroes = require("./utils/formatHeroes");
 
 // async function seed() {
@@ -182,6 +182,7 @@ const formatHeroes = require("./utils/formatHeroes");
 // }
 
 const seed = async ({ roles, heroes, maps }) => {
+  console.log(`Seeding on ${process.env.PGDATABASE}`);
   await db.query("DROP TABLE IF EXISTS maps");
   await db.query("DROP TABLE IF EXISTS heroes");
   await db.query("DROP TABLE IF EXISTS roles");
@@ -193,46 +194,15 @@ const seed = async ({ roles, heroes, maps }) => {
   const insertedRoles = await insertRoles(roles);
   console.log(`Seeded ${insertedRoles.length} roles`);
 
-  const formattedHeroes = formatHeroes(heroes, insertedRoles);
-  console.log(formattedHeroes);
-  const insertedHeroes = await insertHeroes(formattedHeroes);
+  const insertedHeroes = await insertHeroes(
+    formatHeroes(heroes, insertedRoles)
+  );
   console.log(`Seeded ${insertedHeroes.length} heroes`);
 
+  const insertedMaps = await insertMaps(maps);
+  console.log(`Seeded ${insertedMaps.length} maps`);
+
   return { heroes: insertedHeroes, roles: insertedRoles };
-};
-
-const formatRoleData = (roles) => {
-  return roles.map(({ role_name }) => {
-    return [role_name];
-  });
-};
-
-const insertRoles = async (roles) => {
-  const formattedRoles = formatRoleData(roles);
-  const sql = format(
-    "INSERT INTO roles (role_name) VALUES %L RETURNING *",
-    formattedRoles
-  );
-  const { rows } = await db.query(sql);
-  console.log("Inserted roles:", rows);
-  return rows;
-};
-
-const formatHeroData = (heroes) => {
-  return heroes.map(({ hero_name, role_id }) => {
-    return [hero_name, role_id];
-  });
-};
-
-const insertHeroes = async (heroes) => {
-  const formattedHeroes = formatHeroData(heroes);
-  const sql = format(
-    "INSERT INTO heroes (hero_name, role_id) VALUES %L RETURNING *",
-    formattedHeroes
-  );
-  const { rows } = await db.query(sql);
-  console.log("Inserted heroes:", rows);
-  return rows;
 };
 
 module.exports = seed;
