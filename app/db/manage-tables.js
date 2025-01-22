@@ -30,4 +30,17 @@ const createMaps = async () => {
     `);
 };
 
-module.exports = { createRoles, createMaps, createHeroes };
+const createUsers = async () => {
+  return db.query(`
+    CREATE TABLE users (
+      user_id SERIAL PRIMARY KEY,
+      user_name VARCHAR(15) NOT NULL,
+      user_main_role INTEGER REFERENCES roles(role_id),
+      user_main_hero INTEGER REFERENCES heroes(hero_id),
+      dps_sr INTEGER,
+      support_sr INTEGER,
+      tank_sr INTEGER
+    );
+    `);
+};
+module.exports = { createRoles, createMaps, createHeroes, createUsers };

@@ -83,6 +83,24 @@ describe("/api/heroes", () => {
         });
       });
     });
+
+    test("404: responds with error message when given invalid role", async () => {
+      const response = await request(app)
+        .get("/api/heroes?role=invalid")
+        .expect(404);
+
+      expect(response.body.message).toBe("No heroes found with role: invalid");
+    });
+
+    test("400: responds with error message when given invalid data type", async () => {
+      const response = await request(app)
+        .get("/api/heroes?role=123")
+        .expect(400);
+
+      expect(response.body.message).toEqual(
+        "Invalid input: role must be a string"
+      );
+    });
   });
 
   describe("GET /api/heroes/:hero_name", () => {
