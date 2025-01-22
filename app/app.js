@@ -7,7 +7,9 @@ app.use(express.json());
 app.use("/api", apiRouter);
 
 app.all("*", (req, res, next) => {
-  next(new CustomError(404, `Can't find ${req.originalUrl} on this server`));
+  const error = new Error(`Can't find ${req.originalUrl} on this server`);
+  error.statusCode = 404;
+  next(error);
 });
 
 app.use((err, req, res, next) => {

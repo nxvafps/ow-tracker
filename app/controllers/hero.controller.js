@@ -1,5 +1,4 @@
 const heroModel = require("../models/hero.model.js");
-const CustomError = require("../errors/customError.js");
 
 class HeroController {
   async getHero(req, res, next) {
@@ -8,7 +7,11 @@ class HeroController {
       const hero = await heroModel.getHeroByName(heroName);
 
       if (!hero.length) {
-        return next(new CustomError(404, "Hero not found"));
+        return next({
+          statusCode: 404,
+          status: "fail",
+          message: "Hero not found",
+        });
       }
 
       res.json({ hero });
@@ -22,7 +25,11 @@ class HeroController {
       const { role } = req.query;
 
       if (role && !isNaN(role)) {
-        throw new CustomError(400, "Invalid input: role must be a string");
+        return next({
+          statusCode: 400,
+          status: "fail",
+          message: "Invalid input: role must be a string",
+        });
       }
 
       const heroes = role
@@ -30,10 +37,13 @@ class HeroController {
         : await heroModel.getAllHeroes();
 
       if (!heroes.length) {
-        throw new CustomError(
-          404,
-          role ? `No heroes found with role: ${role}` : "Heroes not found"
-        );
+        return next({
+          statusCode: 404,
+          status: "fail",
+          message: role
+            ? `No heroes found with role: ${role}`
+            : "Heroes not found",
+        });
       }
 
       res.json({ heroes });
