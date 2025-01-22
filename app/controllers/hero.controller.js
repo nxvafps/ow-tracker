@@ -1,4 +1,5 @@
 const heroModel = require("../models/hero.model.js");
+const AppError = require("../utils/app-error.js");
 
 class HeroController {
   async getHero(req, res, next) {
@@ -6,12 +7,8 @@ class HeroController {
       const { heroName } = req.params;
       const hero = await heroModel.getHeroByName(heroName);
 
-      if (!hero.length) {
-        return next({
-          statusCode: 404,
-          status: "fail",
-          message: "Hero not found",
-        });
+      if (!hero) {
+        throw AppError.notFound(`Hero not found`);
       }
 
       res.json({ hero });
@@ -25,11 +22,7 @@ class HeroController {
       const { role } = req.query;
 
       if (role && !isNaN(role)) {
-        return next({
-          statusCode: 400,
-          status: "fail",
-          message: "Invalid input: role must be a string",
-        });
+        throw AppError.badRequest("Invalid input: role must be a string");
       }
 
       const heroes = role
@@ -37,13 +30,9 @@ class HeroController {
         : await heroModel.getAllHeroes();
 
       if (!heroes.length) {
-        return next({
-          statusCode: 404,
-          status: "fail",
-          message: role
-            ? `No heroes found with role: ${role}`
-            : "Heroes not found",
-        });
+        throw AppError.notFound(
+          role ? `No heroes found with role: ${role}` : "Heroes not found"
+        );
       }
 
       res.json({ heroes });
