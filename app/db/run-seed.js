@@ -1,5 +1,6 @@
 const seed = require("./seed");
 const data = require("./data");
+const db = require("./index");
 
 const runSeed = async () => {
   try {
@@ -13,5 +14,11 @@ const runSeed = async () => {
 module.exports = runSeed;
 
 if (require.main === module) {
-  runSeed();
+  runSeed()
+    .then(() => db.end())
+    .catch((err) => {
+      console.error(err);
+      db.end();
+      process.exit(1);
+    });
 }
