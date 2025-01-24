@@ -4,7 +4,7 @@ const mapRouter = require("./map.routes");
 const heroRouter = require("./hero.routes");
 
 apiRouter.get("/healthcheck", ApiController.getHealthCheck);
-apiRouter.use("/map", mapRouter);
+apiRouter.use("/maps", mapRouter);
 apiRouter.use("/heroes", heroRouter);
 
 module.exports = apiRouter;

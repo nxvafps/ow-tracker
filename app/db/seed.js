@@ -192,15 +192,15 @@ const seed = async ({ roles, heroes, maps }) => {
   await createMaps();
 
   const insertedRoles = await insertRoles(roles);
-  console.log(`Seeded ${insertedRoles.length} roles`);
+  //console.log(`Seeded ${insertedRoles.length} roles`);
 
   const insertedHeroes = await insertHeroes(
     formatHeroes(heroes, insertedRoles)
   );
-  console.log(`Seeded ${insertedHeroes.length} heroes`);
+  //console.log(`Seeded ${insertedHeroes.length} heroes`);
 
   const insertedMaps = await insertMaps(maps);
-  console.log(`Seeded ${insertedMaps.length} maps`);
+  //console.log(`Seeded ${insertedMaps.length} maps`);
 
   return { heroes: insertedHeroes, roles: insertedRoles };
 };

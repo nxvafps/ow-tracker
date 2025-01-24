@@ -172,7 +172,36 @@ describe("/api", () => {
   });
 
   describe("/api/maps", () => {
-    describe("GET /api/maps", () => {});
+    describe("/api/maps", () => {
+      describe("GET", () => {
+        test("200: responds with an array of maps", async () => {
+          const { body } = await request(app).get("/api/maps").expect(200);
+
+          expect(body).toHaveProperty("maps");
+          expect(Array.isArray(body.maps)).toBe(true);
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map).toMatchObject({
+              map: expect.any(String),
+              game_mode: expect.any(String),
+              submaps: expect.toBeOneOf([expect.any(Object), null]),
+              distances: expect.toBeOneOf([
+                {
+                  distance1: expect.any(Number),
+                  distance2: expect.any(Number),
+                  distance3: expect.any(Number),
+                },
+                {
+                  distance1: expect.any(Number),
+                  distance2: expect.any(Number),
+                },
+                null,
+              ]),
+            });
+          });
+        });
+      });
+    });
     describe("GET /api/maps (queries)", () => {});
     describe("GET /api/maps/:map_name", () => {});
   });
