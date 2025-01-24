@@ -1,13 +1,21 @@
 const db = require("../db");
-
+require("jest-sorted");
 class HeroModel {
-  async getAllHeroes() {
-    const query = `
+  async getAllHeroes(order, role) {
+    const baseQuery = `
       SELECT heroes.hero_name, roles.role_name
       FROM heroes
-      JOIN roles ON heroes.role_id = roles.role_id;`;
+      JOIN roles ON heroes.role_id = roles.role_id`;
 
-    const { rows } = await db.query(query);
+    const whereClause = role ? `WHERE LOWER(role_name) = LOWER($1)` : "";
+    const orderClause = order
+      ? `ORDER BY heroes.hero_id ${order.toUpperCase()}`
+      : "ORDER BY hero_id";
+
+    const query = `${baseQuery} ${whereClause} ${orderClause};`;
+
+    const params = role ? [role] : [];
+    const { rows } = await db.query(query, params);
     return rows;
   }
 
@@ -21,18 +29,6 @@ class HeroModel {
 
     const { rows } = await db.query(query, [formattedName]);
     return rows;
-  }
-
-  async getHeroesByRole(roleName) {
-    const query = `
-        SELECT heroes.hero_name, roles.role_name
-        FROM heroes
-        JOIN roles ON heroes.role_id = roles.role_id
-        WHERE LOWER(role_name) = LOWER($1)
-        ORDER BY hero_name;`;
-
-    const result = await db.query(query, [roleName]);
-    return result.rows;
   }
 
   formatHeroName(heroName) {

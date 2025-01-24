@@ -19,15 +19,19 @@ class HeroController {
 
   async getAllHeroes(req, res, next) {
     try {
-      const { role } = req.query;
+      const { role, order } = req.query;
 
       if (role && !isNaN(role)) {
         throw AppError.badRequest("Invalid input: role must be a string");
       }
 
-      const heroes = role
-        ? await heroModel.getHeroesByRole(role)
-        : await heroModel.getAllHeroes();
+      if (order && !["asc", "desc"].includes(order.toLowerCase())) {
+        throw AppError.badRequest(
+          "Invalid order query - must be 'asc' or 'desc'"
+        );
+      }
+
+      const heroes = await heroModel.getAllHeroes(order, role);
 
       if (!heroes.length) {
         throw AppError.notFound(
