@@ -8,7 +8,7 @@ const insertRoles = async (roles) => {
     formatData(roles)
   );
   const { rows } = await db.query(sql);
-  //console.log("Inserted roles:", rows);
+  if (process.env.NODE_ENV !== "test") console.log("Inserted roles:", rows);
   return rows;
 };
 
@@ -18,7 +18,7 @@ const insertHeroes = async (heroes) => {
     formatData(heroes)
   );
   const { rows } = await db.query(sql);
-  //console.log("Inserted heroes:", rows);
+  if (process.env.NODE_ENV !== "test") console.log("Inserted heroes:", rows);
   return rows;
 };
 
@@ -28,7 +28,17 @@ const insertMaps = async (maps) => {
     formatData(maps)
   );
   const { rows } = await db.query(sql);
-  //console.log("Inserted maps:", rows);
+  if (process.env.NODE_ENV !== "test") console.log("Inserted maps:", rows);
   return rows;
 };
-module.exports = { insertRoles, insertHeroes, insertMaps };
+
+const insertUsers = async (users) => {
+  const sql = format(
+    "INSERT INTO users (user_name, user_main_role, user_main_hero, dps_sr, support_sr, tank_sr) VALUES %L RETURNING *",
+    formatData(users)
+  );
+  const { rows } = await db.query(sql);
+  if (process.env.NODE_ENV !== "test") console.log("Inserted users:", rows);
+  return rows;
+};
+module.exports = { insertRoles, insertHeroes, insertMaps, insertUsers };
