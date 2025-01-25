@@ -1,6 +1,6 @@
 const seed = require("./seed");
 const data = require("./data");
-const db = require("./index");
+const db = require("./");
 
 const runSeed = async () => {
   try {

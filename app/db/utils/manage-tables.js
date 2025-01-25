@@ -1,4 +1,4 @@
-const db = require("./index");
+const db = require("../");
 
 const createRoles = async () => {
   return db.query(`

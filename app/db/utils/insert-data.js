@@ -1,6 +1,6 @@
 const format = require("pg-format");
-const db = require("./index");
-const formatData = require("./utils/formatData");
+const db = require("../");
+const formatData = require("./formatData");
 
 const insertRoles = async (roles) => {
   const sql = format(

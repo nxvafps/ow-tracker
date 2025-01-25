@@ -366,7 +366,7 @@ describe("/api", () => {
             .get("/api/maps/not-a-real-map")
             .expect(404);
 
-          expect(body.message).toBe("Map not found");
+          expect(body.message).toBe("Not found");
         });
       });
     });

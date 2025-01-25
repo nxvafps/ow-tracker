@@ -41,7 +41,7 @@ class MapController {
       const map = await mapModel.getMapByName(map_name);
 
       if (!map.length) {
-        throw AppError.notFound("Map not found");
+        throw AppError.notFound("Not found");
       }
 
       res.json({ map });

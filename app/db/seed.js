@@ -1,6 +1,14 @@
 const db = require("./index");
-const { createRoles, createHeroes, createMaps } = require("./manage-tables");
-const { insertRoles, insertHeroes, insertMaps } = require("./insert-data");
+const {
+  createRoles,
+  createHeroes,
+  createMaps,
+} = require("./utils/manage-tables");
+const {
+  insertRoles,
+  insertHeroes,
+  insertMaps,
+} = require("./utils/insert-data");
 const formatHeroes = require("./utils/formatHeroes");
 
 // async function seed() {
