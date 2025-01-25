@@ -1,5 +1,6 @@
 const formatHeroes = require("../app/db/utils/formatHeroes.js");
 const formatData = require("../app/db/utils/formatData");
+const formatUsers = require("../app/db/utils/formatUsers.js");
 
 describe("formatHeroes", () => {
   let hero, heroes, roles;
@@ -212,6 +213,110 @@ describe("formatData", () => {
           distance2: 111.54,
         },
       ],
+    ]);
+  });
+});
+
+describe("formatUsers", () => {
+  let user, users, heroes, roles;
+  beforeEach(() => {
+    user = [
+      {
+        user_name: "nova",
+        user_main_role: "DPS",
+        user_main_hero: "Echo",
+        dps_sr: 2500,
+        support_sr: null,
+        tank_sr: null,
+      },
+    ];
+
+    users = [
+      {
+        user_name: "nova",
+        user_main_role: "DPS",
+        user_main_hero: "Echo",
+        dps_sr: 2500,
+        support_sr: null,
+        tank_sr: null,
+      },
+      {
+        user_name: "omby",
+        user_main_role: "Support",
+        user_main_hero: "Kiriko",
+        dps_sr: 2000,
+        support_sr: 1500,
+        tank_sr: null,
+      },
+    ];
+
+    roles = [
+      { role_id: 1, role_name: "DPS" },
+      { role_id: 2, role_name: "Support" },
+      { role_id: 3, role_name: "Tank" },
+    ];
+
+    heroes = [
+      { hero_id: 1, hero_name: "Echo" },
+      { hero_id: 2, hero_name: "Kiriko" },
+    ];
+  });
+
+  it("returns a new object", () => {
+    expect(formatUsers(user, heroes, roles)).not.toBe(user);
+    expect(formatUsers(user, heroes, roles)).not.toBe(heroes);
+    expect(formatUsers(user, heroes, roles)).not.toBe(roles);
+  });
+
+  it("does not mutate the input", () => {
+    formatUsers(user, heroes, roles);
+    expect(user).toEqual([
+      {
+        user_name: "nova",
+        user_main_role: "DPS",
+        user_main_hero: "Echo",
+        dps_sr: 2500,
+        support_sr: null,
+        tank_sr: null,
+      },
+    ]);
+  });
+
+  it("returns an empty array when passed an empty array", () => {
+    expect(formatUsers([], heroes, roles)).toEqual([]);
+  });
+
+  it("updates role and hero ids on one single object", () => {
+    expect(formatUsers(user, heroes, roles)).toEqual([
+      {
+        user_name: "nova",
+        user_main_role: 1,
+        user_main_hero: 1,
+        dps_sr: 2500,
+        support_sr: null,
+        tank_sr: null,
+      },
+    ]);
+  });
+
+  it("updates role and hero ids on multiple objects", () => {
+    expect(formatUsers(users, heroes, roles)).toEqual([
+      {
+        user_name: "nova",
+        user_main_role: 1,
+        user_main_hero: 1,
+        dps_sr: 2500,
+        support_sr: null,
+        tank_sr: null,
+      },
+      {
+        user_name: "omby",
+        user_main_role: 2,
+        user_main_hero: 2,
+        dps_sr: 2000,
+        support_sr: 1500,
+        tank_sr: null,
+      },
     ]);
   });
 });

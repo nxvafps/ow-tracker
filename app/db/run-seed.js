@@ -1,6 +1,9 @@
 const seed = require("./seed");
-const data = require("./data");
+const testData = require("./data/test-data");
+const devData = require("./data/dev-data");
 const db = require("./");
+
+const data = process.env.NODE_ENV === "test" ? testData : devData;
 
 const runSeed = async () => {
   try {
