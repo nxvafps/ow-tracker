@@ -201,8 +201,174 @@ describe("/api", () => {
           });
         });
       });
+      describe("GET (queries)", () => {
+        describe("game_mode queries", () => {
+          test("200: responds with array of Control maps", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?game_mode=control")
+              .expect(200);
+
+            expect(body.maps).toBeInstanceOf(Array);
+            expect(body.maps.length).toBeGreaterThan(0);
+            body.maps.forEach((map) => {
+              expect(map.game_mode).toBe("Control");
+              expect(map.submaps).toEqual(expect.any(Object));
+              expect(map.distances).toBeNull();
+            });
+          });
+
+          test("200: responds with array of Escort maps", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?game_mode=escort")
+              .expect(200);
+
+            expect(body.maps).toBeInstanceOf(Array);
+            expect(body.maps.length).toBeGreaterThan(0);
+            body.maps.forEach((map) => {
+              expect(map.game_mode).toBe("Escort");
+              expect(map.submaps).toBeNull();
+              expect(map.distances).toMatchObject({
+                distance1: expect.any(Number),
+                distance2: expect.any(Number),
+                distance3: expect.any(Number),
+              });
+            });
+          });
+
+          test("200: responds with array of Push maps", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?game_mode=push")
+              .expect(200);
+
+            expect(body.maps).toBeInstanceOf(Array);
+            expect(body.maps.length).toBeGreaterThan(0);
+            body.maps.forEach((map) => {
+              expect(map.game_mode).toBe("Push");
+              expect(map.submaps).toBeNull();
+              expect(map.distances).toMatchObject({
+                distance1: expect.any(Number),
+                distance2: expect.any(Number),
+              });
+            });
+          });
+
+          test("404: responds with error for invalid game mode", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?game_mode=invalid")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+        });
+
+        describe("sort queries", () => {
+          test("200: responds with maps sorted by name ASC", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?sort=asc")
+              .expect(200);
+
+            const mapNames = body.maps.map((map) => map.map);
+            expect(mapNames).toBeSorted();
+          });
+
+          test("200: responds with maps sorted by name DESC", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?sort=desc")
+              .expect(200);
+
+            const mapNames = body.maps.map((map) => map.map);
+            expect(mapNames).toBeSorted({ descending: true });
+          });
+
+          test("400: responds with error for invalid sort value", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?sort=invalid")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+        });
+
+        describe("has_submaps queries", () => {
+          test("200: responds with only maps that have submaps", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?has_submaps=true")
+              .expect(200);
+
+            expect(body.maps.length).toBeGreaterThan(0);
+            body.maps.forEach((map) => {
+              expect(map.submaps).toEqual(expect.any(Object));
+            });
+          });
+
+          test("200: responds with only maps that don't have submaps", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?has_submaps=false")
+              .expect(200);
+
+            expect(body.maps.length).toBeGreaterThan(0);
+            body.maps.forEach((map) => {
+              expect(map.submaps).toBeNull();
+            });
+          });
+
+          test("400: responds with error for invalid has_submaps value", async () => {
+            const { body } = await request(app)
+              .get("/api/maps?has_submaps=invalid")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+        });
+      });
     });
-    describe("GET /api/maps (queries)", () => {});
-    describe("GET /api/maps/:map_name", () => {});
+
+    describe("/api/maps/:map_name", () => {
+      describe("GET", () => {
+        test("200: responds with a specific map", async () => {
+          const { body } = await request(app)
+            .get("/api/maps/antarctic-peninsula")
+            .expect(200);
+
+          expect(body).toHaveProperty("map");
+          expect(Array.isArray(body.map)).toBe(true);
+          expect(body.map.length).toBe(1);
+          expect(body.map[0]).toMatchObject({
+            map: "Antarctic Peninsula",
+            game_mode: "Control",
+            submaps: {
+              submap1: "Icebreaker",
+              submap2: "Labs",
+              submap3: "Sublevel",
+            },
+            distances: null,
+          });
+        });
+
+        test("200: responds with map when name contains spaces", async () => {
+          const { body } = await request(app)
+            .get("/api/maps/kings-row")
+            .expect(200);
+
+          expect(body.map[0]).toMatchObject({
+            map: "King's Row",
+            game_mode: "Hybrid",
+            submaps: null,
+            distances: {
+              distance1: expect.any(Number),
+              distance2: expect.any(Number),
+            },
+          });
+        });
+
+        test("404: responds with error when map does not exist", async () => {
+          const { body } = await request(app)
+            .get("/api/maps/not-a-real-map")
+            .expect(404);
+
+          expect(body.message).toBe("Map not found");
+        });
+      });
+    });
   });
 });
