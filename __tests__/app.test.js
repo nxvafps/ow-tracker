@@ -371,4 +371,227 @@ describe("/api", () => {
       });
     });
   });
+  describe("/api/users", () => {
+    describe("GET", () => {
+      test("200: should successfully return all users", async () => {
+        const { body } = await request(app).get("/api/users").expect(200);
+
+        expect(body).toHaveProperty("users");
+        expect(Array.isArray(body.users)).toBe(true);
+        expect(body.users.length).toBe(7);
+
+        body.users.forEach((user) => {
+          expect(user).toMatchObject({
+            user_name: expect.any(String),
+            user_main_role: expect.any(String),
+            user_main_hero: expect.any(String),
+            dps_sr: expect.toBeOneOf([expect.any(Number), null]),
+            support_sr: expect.toBeOneOf([expect.any(Number), null]),
+            tank_sr: expect.toBeOneOf([expect.any(Number), null]),
+          });
+        });
+      });
+    });
+    describe("/api/users/:username", () => {
+      describe("GET", () => {
+        test("200: responds with the requested user", async () => {
+          const { body } = await request(app)
+            .get("/api/users/nova")
+            .expect(200);
+
+          expect(body).toHaveProperty("user");
+          expect(body.user).toMatchObject({
+            user_name: "nova",
+            user_main_role: "DPS",
+            user_main_hero: "Echo",
+            dps_sr: 2500,
+            support_sr: null,
+            tank_sr: null,
+          });
+        });
+
+        test("404: responds with error when username does not exist", async () => {
+          const { body } = await request(app)
+            .get("/api/users/nonexistent")
+            .expect(404);
+
+          expect(body.message).toBe("Not found");
+        });
+      });
+      describe("PATCH", () => {
+        test("200: should update user's SR for a specific role", async () => {
+          const updateData = {
+            dps_sr: 2600,
+            support_sr: null,
+            tank_sr: 3000,
+          };
+
+          const { body } = await request(app)
+            .patch("/api/users/nova")
+            .send(updateData)
+            .expect(200);
+
+          expect(body.user).toMatchObject({
+            user_name: "nova",
+            user_main_role: "DPS",
+            user_main_hero: "Echo",
+            dps_sr: 2600,
+            support_sr: null,
+            tank_sr: 3000,
+          });
+        });
+
+        test("400: responds with error when given invalid SR value", async () => {
+          const invalidUpdate = {
+            dps_sr: "not a number",
+          };
+
+          const { body } = await request(app)
+            .patch("/api/users/nova")
+            .send(invalidUpdate)
+            .expect(400);
+
+          expect(body.message).toBe("Bad request");
+        });
+
+        test("400: responds with error when SR is out of valid range", async () => {
+          const invalidUpdate = {
+            dps_sr: 5000,
+          };
+
+          const { body } = await request(app)
+            .patch("/api/users/nova")
+            .send(invalidUpdate)
+            .expect(400);
+
+          expect(body.message).toBe("Bad request");
+        });
+
+        test("404: responds with error when user does not exist", async () => {
+          const updateData = {
+            dps_sr: 2600,
+          };
+
+          const { body } = await request(app)
+            .patch("/api/users/nonexistent")
+            .send(updateData)
+            .expect(404);
+
+          expect(body.message).toBe("Not found");
+        });
+      });
+    });
+  });
+  xdescribe("/api/games", () => {
+    describe("POST", () => {
+      test("201: should successfully post a game and return the posted game", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "omby",
+          role: "Support",
+          map: "Throne of Annubis",
+          mode: "Clash",
+          rounds: [
+            {
+              hero_1_name: "Kiriko",
+              hero_2_name: "Illari",
+              hero_3_name: null,
+              team_score: 2,
+              enemy_score: 5,
+            },
+          ],
+          team_score: 2,
+          enemy_score: 5,
+          result: "loss",
+          sr_change: 23,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 2,
+          enemy_score: 5,
+          result: "loss",
+          sr_change: 23,
+        });
+
+        expect(body.game.clash_game).toMatchObject({
+          clash_game_id: expect.any(Number),
+          game_id: body.game.game_id,
+          hero_id_1: expect.any(Number),
+          hero_id_2: expect.any(Number),
+          hero_id_3: null,
+          team_score: 2,
+          enemy_score: 5,
+        });
+
+        const { body: userBody } = await request(app)
+          .get("/api/users/omby")
+          .expect(200);
+
+        expect(userBody.user.support_sr).toBe(1477); // 1500 - 23
+      });
+
+      test("400: responds with error when missing required fields", async () => {
+        const invalidGame = {
+          season: 14,
+          role: "Support",
+          map: "Throne of Annubis",
+          mode: "Clash",
+          rounds: [
+            {
+              hero_1_name: "Kiriko",
+              team_score: 2,
+              enemy_score: 5,
+            },
+          ],
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(invalidGame)
+          .expect(400);
+
+        expect(body.message).toBe("Bad request: Missing required fields");
+      });
+
+      test("404: responds with error when user does not exist", async () => {
+        const gameWithInvalidUser = {
+          season: 14,
+          user_name: "nonexistent_user",
+          role: "Support",
+          map: "Throne of Annubis",
+          mode: "Clash",
+          rounds: [
+            {
+              hero_1_name: "Kiriko",
+              hero_2_name: "Illari",
+              hero_3_name: null,
+              team_score: 2,
+              enemy_score: 5,
+            },
+          ],
+          team_score: 2,
+          enemy_score: 5,
+          result: "loss",
+          sr_change: 23,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(gameWithInvalidUser)
+          .expect(404);
+
+        expect(body.message).toBe("User not found");
+      });
+    });
+  });
 });
