@@ -4,6 +4,13 @@ const {
   createHeroes,
   createMaps,
   createUsers,
+  createGames,
+  createClashGames,
+  createControlGames,
+  createEscortGames,
+  createFlashpointGames,
+  createHybridGames,
+  createPushGames,
 } = require("./utils/manage-tables");
 const {
   insertRoles,
@@ -16,6 +23,13 @@ const formatUsers = require("./utils/formatUsers");
 
 const seed = async ({ roles, heroes, maps, users }) => {
   console.log(`Seeding on ${process.env.PGDATABASE}`);
+  await db.query("DROP TABLE IF EXISTS push_games");
+  await db.query("DROP TABLE IF EXISTS hybrid_games");
+  await db.query("DROP TABLE IF EXISTS flashpoint_games");
+  await db.query("DROP TABLE IF EXISTS escort_games");
+  await db.query("DROP TABLE IF EXISTS control_games");
+  await db.query("DROP TABLE IF EXISTS clash_games");
+  await db.query("DROP TABLE IF EXISTS games");
   await db.query("DROP TABLE IF EXISTS users");
   await db.query("DROP TABLE IF EXISTS maps");
   await db.query("DROP TABLE IF EXISTS heroes");
@@ -25,6 +39,13 @@ const seed = async ({ roles, heroes, maps, users }) => {
   await createHeroes();
   await createMaps();
   await createUsers();
+  await createGames();
+  await createClashGames();
+  await createControlGames();
+  await createEscortGames();
+  await createFlashpointGames();
+  await createHybridGames();
+  await createPushGames();
 
   const insertedRoles = await insertRoles(roles);
   if (process.env.NODE_ENV !== "test")
