@@ -6,7 +6,6 @@ module.exports = [
     map: "Hanaoka",
     rounds: [
       {
-        round_number: 1,
         hero_1_name: "Echo",
         hero_2_name: "Tracer",
         hero_3_name: null,
@@ -26,7 +25,6 @@ module.exports = [
     map: "Throne of Annubis",
     rounds: [
       {
-        round_number: 1,
         hero_1_name: "Kiriko",
         hero_2_name: "Illari",
         hero_3_name: null,
