@@ -43,6 +43,25 @@ class UserController {
       next(error);
     }
   }
+
+  async createUser(req, res, next) {
+    try {
+      const userData = req.body;
+
+      if (
+        !userData.user_name ||
+        !userData.user_main_role ||
+        !userData.user_main_hero
+      ) {
+        throw AppError.badRequest("Bad request");
+      }
+
+      const user = await userModel.createUser(userData);
+      res.status(201).json({ user });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new UserController();

@@ -392,6 +392,78 @@ describe("/api", () => {
         });
       });
     });
+    describe("POST", () => {
+      test("201: should successfully create a new user", async () => {
+        const newUser = {
+          user_name: "testUser",
+          user_main_role: "Tank",
+          user_main_hero: "D.va",
+          dps_sr: null,
+          support_sr: 2100,
+          tank_sr: 2800,
+        };
+
+        const { body } = await request(app)
+          .post("/api/users")
+          .send(newUser)
+          .expect(201);
+
+        expect(body.user).toMatchObject({
+          user_name: "testUser",
+          user_main_role: "Tank",
+          user_main_hero: "D.va",
+          dps_sr: null,
+          support_sr: 2100,
+          tank_sr: 2800,
+        });
+      });
+
+      test("400: fails when missing required properties", async () => {
+        const invalidUser = {
+          user_name: "testUser",
+          dps_sr: 2500,
+        };
+
+        const { body } = await request(app)
+          .post("/api/users")
+          .send(invalidUser)
+          .expect(400);
+
+        expect(body.message).toBe("Bad request");
+      });
+
+      test("400: fails when SR value is invalid", async () => {
+        const invalidUser = {
+          user_name: "testUser",
+          user_main_role: "DPS",
+          user_main_hero: "Echo",
+          dps_sr: 5000,
+        };
+
+        const { body } = await request(app)
+          .post("/api/users")
+          .send(invalidUser)
+          .expect(400);
+
+        expect(body.message).toBe("Bad request");
+      });
+
+      test("400: fails when role or hero doesn't exist", async () => {
+        const invalidUser = {
+          user_name: "testUser",
+          user_main_role: "InvalidRole",
+          user_main_hero: "InvalidHero",
+          dps_sr: 2500,
+        };
+
+        const { body } = await request(app)
+          .post("/api/users")
+          .send(invalidUser)
+          .expect(400);
+
+        expect(body.message).toBe("Bad request");
+      });
+    });
     describe("/api/users/:username", () => {
       describe("GET", () => {
         test("200: responds with the requested user", async () => {
