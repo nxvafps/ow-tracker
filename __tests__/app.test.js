@@ -1023,5 +1023,271 @@ describe("/api", () => {
         expect(body.message).toBe("Not found");
       });
     });
+    describe("/api/games/:user_name", () => {
+      //queries: map_name, result
+      //add endpoint for :user_name/game_id too
+      beforeEach(async () => {
+        const testGames = require("../app/db/data/test-data/games.js");
+        for (const game of testGames) {
+          await request(app).post("/api/games").send(game);
+        }
+      });
+
+      describe("GET", () => {
+        test("200: should display all games from a single user", async () => {
+          const { body } = await request(app)
+            .get("/api/games/nova")
+            .expect(200);
+
+          expect(body).toHaveProperty("games");
+          expect(Array.isArray(body.games)).toBe(true);
+          expect(body.games.length).toBe(8);
+
+          body.games.forEach((game) => {
+            expect(game).toMatchObject({
+              game_id: expect.any(Number),
+              season: expect.any(Number),
+              user_id: expect.any(Number),
+              role_id: expect.any(Number),
+              map_id: expect.any(Number),
+              team_score: expect.any(Number),
+              enemy_score: expect.any(Number),
+              result: expect.any(String),
+              sr_change: expect.any(Number),
+            });
+          });
+
+          expect(body.games.every((game) => game.user_name === "nova")).toBe(
+            true
+          );
+        });
+
+        test("400: should return bad request if user_name is not a string", async () => {
+          const { body } = await request(app).get("/api/games/123").expect(400);
+
+          expect(body.message).toBe("Bad request");
+        });
+
+        test("404: should return not found if user_name is a string but is not found", async () => {
+          const { body } = await request(app)
+            .get("/api/games/nonexistentuser")
+            .expect(404);
+
+          expect(body.message).toBe("Not found");
+        });
+      });
+
+      describe("GET (queries)", () => {
+        describe("season queries", () => {
+          test("200: should filter games by season", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?season=14")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                season: 14,
+                user_name: "nova",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                result: expect.any(String),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("400: should return bad request if season is not a number", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?season=invalid")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+
+          test("404: should return not found if no games exist for that season", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?season=1")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+        });
+
+        describe("role queries", () => {
+          test("200: should filter games by role", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?role=DPS")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                user_name: "nova",
+                role_name: "DPS",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                result: expect.any(String),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("400: should return bad request if role name is a number", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?role=123")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+
+          test("404: should return not found if no games exist for that role", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?role=Support")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+
+          test("404: should return not found if role does not exist", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?role=InvalidRole")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+        });
+
+        describe("map_name queries", () => {
+          test("200: should filter games by map name", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?map_name=Illios")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                user_name: "nova",
+                map_name: "Illios",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                result: expect.any(String),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("200: should handle map names with spaces", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?map_name=Circuit%20Royale")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                user_name: "nova",
+                map_name: "Circuit Royale",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                result: expect.any(String),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("404: should return not found if no games exist for that map", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?map_name=Eichenwalde")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+
+          test("404: should return not found if map does not exist", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?map_name=InvalidMap")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+        });
+
+        describe("result queries", () => {
+          test("200: should filter games by win result", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?result=win")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                user_name: "nova",
+                result: "win",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("200: should filter games by loss result", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?result=loss")
+              .expect(200);
+
+            expect(body).toHaveProperty("games");
+            expect(Array.isArray(body.games)).toBe(true);
+            expect(body.games.length).toBeGreaterThan(0);
+
+            body.games.forEach((game) => {
+              expect(game).toMatchObject({
+                game_id: expect.any(Number),
+                user_name: "nova",
+                result: "loss",
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+                sr_change: expect.any(Number),
+              });
+            });
+          });
+
+          test("400: should return bad request if result is invalid", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova?result=invalid")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+
+          test("404: should return not found if no games exist with that result", async () => {
+            const { body } = await request(app)
+              .get("/api/games/mercy_main?result=win")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+        });
+      });
+    });
   });
 });

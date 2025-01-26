@@ -261,6 +261,58 @@ class GameModel {
       client.release();
     }
   }
+
+  async getGamesByUser(userName, queries = {}) {
+    const { season, role, map_name, result } = queries;
+    let query = `
+      SELECT 
+        games.*,
+        users.user_name,
+        roles.role_name,
+        maps.map_name
+      FROM games
+      JOIN users ON games.user_id = users.user_id
+      JOIN roles ON games.role_id = roles.role_id
+      JOIN maps ON games.map_id = maps.map_id
+      WHERE LOWER(users.user_name) = LOWER($1)
+    `;
+
+    const queryParams = [userName];
+
+    if (season !== undefined) {
+      if (isNaN(season)) {
+        throw AppError.badRequest("Bad request");
+      }
+      queryParams.push(season);
+      query += ` AND games.season = $${queryParams.length}`;
+    }
+
+    if (role) {
+      queryParams.push(role);
+      query += ` AND LOWER(roles.role_name) = LOWER($${queryParams.length})`;
+    }
+
+    if (map_name) {
+      queryParams.push(map_name);
+      query += ` AND LOWER(maps.map_name) = LOWER($${queryParams.length})`;
+    }
+
+    if (result) {
+      if (!["win", "loss"].includes(result.toLowerCase())) {
+        throw AppError.badRequest("Bad request");
+      }
+      queryParams.push(result);
+      query += ` AND LOWER(games.result) = LOWER($${queryParams.length})`;
+    }
+
+    const { rows } = await db.query(query, queryParams);
+
+    if (!rows.length) {
+      throw AppError.notFound("Not found");
+    }
+
+    return rows;
+  }
 }
 
 module.exports = new GameModel();

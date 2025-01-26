@@ -27,6 +27,32 @@ class GameController {
       next(error);
     }
   }
+
+  async getGamesByUser(req, res, next) {
+    try {
+      const { user_name } = req.params;
+      const { season, role, map_name, result } = req.query;
+
+      if (!isNaN(user_name)) {
+        throw AppError.badRequest("Bad request");
+      }
+
+      if (role && !isNaN(role)) {
+        throw AppError.badRequest("Bad request");
+      }
+
+      const games = await gameModel.getGamesByUser(user_name, {
+        season: season ? parseInt(season) : undefined,
+        role,
+        map_name,
+        result,
+      });
+
+      res.json({ games });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new GameController();
