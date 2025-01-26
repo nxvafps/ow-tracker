@@ -554,9 +554,9 @@ describe("/api", () => {
       });
     });
   });
-  xdescribe("/api/games", () => {
+  describe("/api/games", () => {
     describe("POST", () => {
-      test("201: should successfully post a game and return the posted game", async () => {
+      test("201: should successfully post a clash game and return the posted game", async () => {
         const newGame = {
           season: 14,
           user_name: "omby",
@@ -612,6 +612,364 @@ describe("/api", () => {
         expect(userBody.user.support_sr).toBe(1477); // 1500 - 23
       });
 
+      test("201: should successfully post a control game and return the posted game with rounds", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "nova",
+          role: "DPS",
+          map: "Illios",
+          mode: "Control",
+          rounds: [
+            {
+              round_number: 1,
+              submap_name: "Well",
+              hero_1_name: "Echo",
+              hero_2_name: "Tracer",
+              hero_3_name: null,
+              team_score: 100,
+              enemy_score: 27,
+            },
+            {
+              round_number: 2,
+              submap_name: "Ruins",
+              hero_1_name: "Tracer",
+              hero_2_name: null,
+              hero_3_name: null,
+              team_score: 100,
+              enemy_score: 0,
+            },
+          ],
+          team_score: 2,
+          enemy_score: 0,
+          result: "win",
+          sr_change: 20,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 2,
+          enemy_score: 0,
+          result: "win",
+          sr_change: 20,
+        });
+
+        expect(Array.isArray(body.game.control_game)).toBe(true);
+        expect(body.game.control_game).toHaveLength(2);
+
+        body.game.control_game.forEach((round, index) => {
+          expect(round).toMatchObject({
+            control_game_id: expect.any(Number),
+            game_id: body.game.game_id,
+            round_number: index + 1,
+            submap_name: newGame.rounds[index].submap_name,
+            hero_id_1: expect.any(Number),
+            hero_id_2: index === 0 ? expect.any(Number) : null,
+            hero_id_3: null,
+            team_score: newGame.rounds[index].team_score,
+            enemy_score: newGame.rounds[index].enemy_score,
+          });
+        });
+
+        const { body: userBody } = await request(app)
+          .get("/api/users/nova")
+          .expect(200);
+
+        expect(userBody.user.dps_sr).toBe(2520);
+      });
+
+      test("201: should successfully post an escort game and return the posted game with rounds", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "nova",
+          role: "DPS",
+          map: "Circuit Royale",
+          mode: "Escort",
+          rounds: [
+            {
+              round_number: 1,
+              starting_side: "Attack",
+              hero_1_name: "Widowmaker",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 3,
+              sub_score: "2:36",
+            },
+            {
+              round_number: 2,
+              starting_side: "Defend",
+              hero_1_name: "Echo",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 2,
+              sub_score: 57.52,
+            },
+          ],
+          team_score: 3,
+          enemy_score: 2,
+          result: "win",
+          sr_change: 20,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 3,
+          enemy_score: 2,
+          result: "win",
+          sr_change: 20,
+        });
+
+        expect(Array.isArray(body.game.escort_game)).toBe(true);
+        expect(body.game.escort_game).toHaveLength(2);
+
+        body.game.escort_game.forEach((round, index) => {
+          expect(round).toMatchObject({
+            escort_game_id: expect.any(Number),
+            game_id: body.game.game_id,
+            round_number: index + 1,
+            starting_side: newGame.rounds[index].starting_side,
+            hero_id_1: expect.any(Number),
+            hero_id_2: null,
+            hero_id_3: null,
+            score: newGame.rounds[index].score,
+            sub_score: newGame.rounds[index].sub_score.toString(),
+          });
+        });
+
+        const { body: userBody } = await request(app)
+          .get("/api/users/nova")
+          .expect(200);
+
+        expect(userBody.user.dps_sr).toBe(2520);
+      });
+
+      test("201: should successfully post a flashpoint game and return the posted game", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "nova",
+          role: "DPS",
+          map: "Suravasa",
+          mode: "Flashpoint",
+          rounds: [
+            {
+              hero_1_name: "Echo",
+              hero_2_name: "Tracer",
+              hero_3_name: null,
+              team_score: 3,
+              enemy_score: 1,
+            },
+          ],
+          team_score: 3,
+          enemy_score: 1,
+          result: "win",
+          sr_change: 20,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 3,
+          enemy_score: 1,
+          result: "win",
+          sr_change: 20,
+        });
+
+        expect(body.game.flashpoint_game).toMatchObject({
+          flashpoint_game_id: expect.any(Number),
+          game_id: body.game.game_id,
+          hero_id_1: expect.any(Number),
+          hero_id_2: expect.any(Number),
+          hero_id_3: null,
+          team_score: 3,
+          enemy_score: 1,
+        });
+
+        // Verify SR change was applied
+        const { body: userBody } = await request(app)
+          .get("/api/users/nova")
+          .expect(200);
+
+        expect(userBody.user.dps_sr).toBe(2520); // 2500 + 20
+      });
+
+      test("201: should successfully post a hybrid game and return the posted game with rounds", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "omby",
+          role: "Support",
+          map: "Numbani",
+          mode: "Hybrid",
+          rounds: [
+            {
+              round_number: 1,
+              starting_side: "Attack",
+              hero_1_name: "Kiriko",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 3,
+              sub_score: "1:32",
+            },
+            {
+              round_number: 2,
+              starting_side: "Defend",
+              hero_1_name: "Zenyatta",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 3,
+              sub_score: "3:42",
+            },
+            {
+              round_number: 3,
+              starting_side: "Attack",
+              hero_1_name: "Kiriko",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 0,
+              sub_score: 42.52,
+            },
+            {
+              round_number: 4,
+              starting_side: "Defend",
+              hero_1_name: "Zenyatta",
+              hero_2_name: null,
+              hero_3_name: null,
+              score: 1,
+              sub_score: 42.53,
+            },
+          ],
+          team_score: 3,
+          enemy_score: 4,
+          result: "loss",
+          sr_change: 20,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 3,
+          enemy_score: 4,
+          result: "loss",
+          sr_change: 20,
+        });
+
+        expect(Array.isArray(body.game.hybrid_game)).toBe(true);
+        expect(body.game.hybrid_game).toHaveLength(4);
+
+        body.game.hybrid_game.forEach((round, index) => {
+          expect(round).toMatchObject({
+            hybrid_game_id: expect.any(Number),
+            game_id: expect.any(Number),
+            round_number: index + 1,
+            starting_side: newGame.rounds[index].starting_side,
+            hero_id_1: expect.any(Number),
+            hero_id_2: null,
+            hero_id_3: null,
+            score: newGame.rounds[index].score,
+            sub_score: newGame.rounds[index].sub_score.toString(),
+          });
+        });
+
+        // Verify SR change was applied
+        const { body: userBody } = await request(app)
+          .get("/api/users/omby")
+          .expect(200);
+
+        expect(userBody.user.support_sr).toBe(1480); // 1500 - 20
+      });
+
+      test("201: should successfully post a push game and return the posted game", async () => {
+        const newGame = {
+          season: 14,
+          user_name: "nova",
+          role: "DPS",
+          map: "Colosseo",
+          mode: "Push",
+          rounds: [
+            {
+              hero_1_name: "Echo",
+              hero_2_name: "Tracer",
+              hero_3_name: null,
+              team_score: 1,
+              team_distance: 100.35,
+              enemy_score: 0,
+              enemy_distance: 70.48,
+            },
+          ],
+          team_score: 1,
+          enemy_score: 0,
+          result: "win",
+          sr_change: 20,
+        };
+
+        const { body } = await request(app)
+          .post("/api/games")
+          .send(newGame)
+          .expect(201);
+
+        expect(body.game).toMatchObject({
+          game_id: expect.any(Number),
+          season: 14,
+          user_id: expect.any(Number),
+          role_id: expect.any(Number),
+          map_id: expect.any(Number),
+          team_score: 1,
+          enemy_score: 0,
+          result: "win",
+          sr_change: 20,
+        });
+
+        expect(body.game.push_game).toMatchObject({
+          push_game_id: expect.any(Number),
+          game_id: body.game.game_id,
+          hero_id_1: expect.any(Number),
+          hero_id_2: expect.any(Number),
+          hero_id_3: null,
+          team_score: 1,
+          team_distance: "100.35",
+          enemy_score: 0,
+          enemy_distance: "70.48",
+        });
+
+        const { body: userBody } = await request(app)
+          .get("/api/users/nova")
+          .expect(200);
+
+        expect(userBody.user.dps_sr).toBe(2520); // 2500 + 20
+      });
+
       test("400: responds with error when missing required fields", async () => {
         const invalidGame = {
           season: 14,
@@ -632,7 +990,7 @@ describe("/api", () => {
           .send(invalidGame)
           .expect(400);
 
-        expect(body.message).toBe("Bad request: Missing required fields");
+        expect(body.message).toBe("Bad request");
       });
 
       test("404: responds with error when user does not exist", async () => {
@@ -662,7 +1020,7 @@ describe("/api", () => {
           .send(gameWithInvalidUser)
           .expect(404);
 
-        expect(body.message).toBe("User not found");
+        expect(body.message).toBe("Not found");
       });
     });
   });
