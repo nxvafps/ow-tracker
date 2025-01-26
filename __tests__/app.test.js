@@ -20,7 +20,7 @@ describe("invalid route", () => {
 });
 
 describe("/api", () => {
-  describe("/api/healthcheck", () => {
+  describe("/healthcheck", () => {
     describe("GET", () => {
       it("should return a status code of 200", () => {
         return request(app).get("/api/healthcheck").expect(200);
@@ -28,7 +28,7 @@ describe("/api", () => {
     });
   });
 
-  describe("/api/heroes", () => {
+  describe("/heroes", () => {
     describe("GET", () => {
       test("200: responds with an array of heroes", async () => {
         const { body } = await request(app).get("/api/heroes").expect(200);
@@ -171,159 +171,157 @@ describe("/api", () => {
     });
   });
 
-  describe("/api/maps", () => {
-    describe("/api/maps", () => {
-      describe("GET", () => {
-        test("200: responds with an array of maps", async () => {
-          const { body } = await request(app).get("/api/maps").expect(200);
+  describe("/maps", () => {
+    describe("GET", () => {
+      test("200: responds with an array of maps", async () => {
+        const { body } = await request(app).get("/api/maps").expect(200);
 
-          expect(body).toHaveProperty("maps");
-          expect(Array.isArray(body.maps)).toBe(true);
-          expect(body.maps.length).toBeGreaterThan(0);
-          body.maps.forEach((map) => {
-            expect(map).toMatchObject({
-              map: expect.any(String),
-              game_mode: expect.any(String),
-              submaps: expect.toBeOneOf([expect.any(Object), null]),
-              distances: expect.toBeOneOf([
-                {
-                  distance1: expect.any(Number),
-                  distance2: expect.any(Number),
-                  distance3: expect.any(Number),
-                },
-                {
-                  distance1: expect.any(Number),
-                  distance2: expect.any(Number),
-                },
-                null,
-              ]),
-            });
-          });
-        });
-      });
-      describe("GET (queries)", () => {
-        describe("game_mode queries", () => {
-          test("200: responds with array of Control maps", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?game_mode=control")
-              .expect(200);
-
-            expect(body.maps).toBeInstanceOf(Array);
-            expect(body.maps.length).toBeGreaterThan(0);
-            body.maps.forEach((map) => {
-              expect(map.game_mode).toBe("Control");
-              expect(map.submaps).toEqual(expect.any(Object));
-              expect(map.distances).toBeNull();
-            });
-          });
-
-          test("200: responds with array of Escort maps", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?game_mode=escort")
-              .expect(200);
-
-            expect(body.maps).toBeInstanceOf(Array);
-            expect(body.maps.length).toBeGreaterThan(0);
-            body.maps.forEach((map) => {
-              expect(map.game_mode).toBe("Escort");
-              expect(map.submaps).toBeNull();
-              expect(map.distances).toMatchObject({
+        expect(body).toHaveProperty("maps");
+        expect(Array.isArray(body.maps)).toBe(true);
+        expect(body.maps.length).toBeGreaterThan(0);
+        body.maps.forEach((map) => {
+          expect(map).toMatchObject({
+            map: expect.any(String),
+            game_mode: expect.any(String),
+            submaps: expect.toBeOneOf([expect.any(Object), null]),
+            distances: expect.toBeOneOf([
+              {
                 distance1: expect.any(Number),
                 distance2: expect.any(Number),
                 distance3: expect.any(Number),
-              });
-            });
-          });
-
-          test("200: responds with array of Push maps", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?game_mode=push")
-              .expect(200);
-
-            expect(body.maps).toBeInstanceOf(Array);
-            expect(body.maps.length).toBeGreaterThan(0);
-            body.maps.forEach((map) => {
-              expect(map.game_mode).toBe("Push");
-              expect(map.submaps).toBeNull();
-              expect(map.distances).toMatchObject({
+              },
+              {
                 distance1: expect.any(Number),
                 distance2: expect.any(Number),
-              });
-            });
-          });
-
-          test("404: responds with error for invalid game mode", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?game_mode=invalid")
-              .expect(404);
-
-            expect(body.message).toBe("Not found");
-          });
-        });
-
-        describe("sort queries", () => {
-          test("200: responds with maps sorted by name ASC", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?sort=asc")
-              .expect(200);
-
-            const mapNames = body.maps.map((map) => map.map);
-            expect(mapNames).toBeSorted();
-          });
-
-          test("200: responds with maps sorted by name DESC", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?sort=desc")
-              .expect(200);
-
-            const mapNames = body.maps.map((map) => map.map);
-            expect(mapNames).toBeSorted({ descending: true });
-          });
-
-          test("400: responds with error for invalid sort value", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?sort=invalid")
-              .expect(400);
-
-            expect(body.message).toBe("Bad request");
-          });
-        });
-
-        describe("has_submaps queries", () => {
-          test("200: responds with only maps that have submaps", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?has_submaps=true")
-              .expect(200);
-
-            expect(body.maps.length).toBeGreaterThan(0);
-            body.maps.forEach((map) => {
-              expect(map.submaps).toEqual(expect.any(Object));
-            });
-          });
-
-          test("200: responds with only maps that don't have submaps", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?has_submaps=false")
-              .expect(200);
-
-            expect(body.maps.length).toBeGreaterThan(0);
-            body.maps.forEach((map) => {
-              expect(map.submaps).toBeNull();
-            });
-          });
-
-          test("400: responds with error for invalid has_submaps value", async () => {
-            const { body } = await request(app)
-              .get("/api/maps?has_submaps=invalid")
-              .expect(400);
-
-            expect(body.message).toBe("Bad request");
+              },
+              null,
+            ]),
           });
         });
       });
     });
+    describe("GET (queries)", () => {
+      describe("game_mode queries", () => {
+        test("200: responds with array of Control maps", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?game_mode=control")
+            .expect(200);
 
-    describe("/api/maps/:map_name", () => {
+          expect(body.maps).toBeInstanceOf(Array);
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map.game_mode).toBe("Control");
+            expect(map.submaps).toEqual(expect.any(Object));
+            expect(map.distances).toBeNull();
+          });
+        });
+
+        test("200: responds with array of Escort maps", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?game_mode=escort")
+            .expect(200);
+
+          expect(body.maps).toBeInstanceOf(Array);
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map.game_mode).toBe("Escort");
+            expect(map.submaps).toBeNull();
+            expect(map.distances).toMatchObject({
+              distance1: expect.any(Number),
+              distance2: expect.any(Number),
+              distance3: expect.any(Number),
+            });
+          });
+        });
+
+        test("200: responds with array of Push maps", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?game_mode=push")
+            .expect(200);
+
+          expect(body.maps).toBeInstanceOf(Array);
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map.game_mode).toBe("Push");
+            expect(map.submaps).toBeNull();
+            expect(map.distances).toMatchObject({
+              distance1: expect.any(Number),
+              distance2: expect.any(Number),
+            });
+          });
+        });
+
+        test("404: responds with error for invalid game mode", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?game_mode=invalid")
+            .expect(404);
+
+          expect(body.message).toBe("Not found");
+        });
+      });
+
+      describe("sort queries", () => {
+        test("200: responds with maps sorted by name ASC", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?sort=asc")
+            .expect(200);
+
+          const mapNames = body.maps.map((map) => map.map);
+          expect(mapNames).toBeSorted();
+        });
+
+        test("200: responds with maps sorted by name DESC", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?sort=desc")
+            .expect(200);
+
+          const mapNames = body.maps.map((map) => map.map);
+          expect(mapNames).toBeSorted({ descending: true });
+        });
+
+        test("400: responds with error for invalid sort value", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?sort=invalid")
+            .expect(400);
+
+          expect(body.message).toBe("Bad request");
+        });
+      });
+
+      describe("has_submaps queries", () => {
+        test("200: responds with only maps that have submaps", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?has_submaps=true")
+            .expect(200);
+
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map.submaps).toEqual(expect.any(Object));
+          });
+        });
+
+        test("200: responds with only maps that don't have submaps", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?has_submaps=false")
+            .expect(200);
+
+          expect(body.maps.length).toBeGreaterThan(0);
+          body.maps.forEach((map) => {
+            expect(map.submaps).toBeNull();
+          });
+        });
+
+        test("400: responds with error for invalid has_submaps value", async () => {
+          const { body } = await request(app)
+            .get("/api/maps?has_submaps=invalid")
+            .expect(400);
+
+          expect(body.message).toBe("Bad request");
+        });
+      });
+    });
+
+    describe("/:map_name", () => {
       describe("GET", () => {
         test("200: responds with a specific map", async () => {
           const { body } = await request(app)
@@ -371,7 +369,7 @@ describe("/api", () => {
       });
     });
   });
-  describe("/api/users", () => {
+  describe("/users", () => {
     describe("GET", () => {
       test("200: should successfully return all users", async () => {
         const { body } = await request(app).get("/api/users").expect(200);
@@ -464,7 +462,7 @@ describe("/api", () => {
         expect(body.message).toBe("Bad request");
       });
     });
-    describe("/api/users/:username", () => {
+    describe("/:username", () => {
       describe("GET", () => {
         test("200: responds with the requested user", async () => {
           const { body } = await request(app)
@@ -554,7 +552,7 @@ describe("/api", () => {
       });
     });
   });
-  describe("/api/games", () => {
+  describe("/games", () => {
     describe("POST", () => {
       test("201: should successfully post a clash game and return the posted game", async () => {
         const newGame = {
@@ -1023,8 +1021,7 @@ describe("/api", () => {
         expect(body.message).toBe("Not found");
       });
     });
-    describe("/api/games/:user_name", () => {
-      //queries: map_name, result
+    describe("/:user_name", () => {
       //add endpoint for :user_name/game_id too
       beforeEach(async () => {
         const testGames = require("../app/db/data/test-data/games.js");
@@ -1285,6 +1282,184 @@ describe("/api", () => {
               .expect(404);
 
             expect(body.message).toBe("Not found");
+          });
+        });
+      });
+      describe("/:game_id", () => {
+        describe("GET", () => {
+          test("200: should return mode-specific data based on game type", async () => {
+            const { body: gamesBody } = await request(app).get(
+              "/api/games/nova"
+            );
+
+            const clashGame = gamesBody.games.find(
+              (game) => game.map_name === "Hanaoka"
+            );
+            const controlGame = gamesBody.games.find(
+              (game) => game.map_name === "Illios"
+            );
+            const escortGame = gamesBody.games.find(
+              (game) => game.map_name === "Circuit Royale"
+            );
+            const flashpointGame = gamesBody.games.find(
+              (game) => game.map_name === "Suravasa"
+            );
+            const hybridGame = gamesBody.games.find(
+              (game) => game.map_name === "King's Row"
+            );
+            const pushGame = gamesBody.games.find(
+              (game) => game.map_name === "Colosseo"
+            );
+
+            const { body: clashBody } = await request(app)
+              .get(`/api/games/nova/${clashGame.game_id}`)
+              .expect(200);
+
+            expect(clashBody.game.mode_specific_data).toMatchObject({
+              hero_names: expect.any(Array),
+              team_score: expect.any(Number),
+              enemy_score: expect.any(Number),
+            });
+
+            const { body: controlBody } = await request(app)
+              .get(`/api/games/nova/${controlGame.game_id}`)
+              .expect(200);
+
+            expect(controlBody.game.mode_specific_data).toHaveLength(2);
+            controlBody.game.mode_specific_data.forEach((round) => {
+              expect(round).toMatchObject({
+                round_number: expect.any(Number),
+                submap_name: expect.any(String),
+                hero_names: expect.any(Array),
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+              });
+            });
+
+            const { body: escortBody } = await request(app)
+              .get(`/api/games/nova/${escortGame.game_id}`)
+              .expect(200);
+
+            expect(Array.isArray(escortBody.game.mode_specific_data)).toBe(
+              true
+            );
+            escortBody.game.mode_specific_data.forEach((round) => {
+              expect(round).toMatchObject({
+                round_number: expect.any(Number),
+                starting_side: expect.any(String),
+                hero_names: expect.any(Array),
+                score: expect.any(Number),
+                sub_score: expect.any(String),
+              });
+            });
+
+            const { body: flashpointBody } = await request(app)
+              .get(`/api/games/nova/${flashpointGame.game_id}`)
+              .expect(200);
+
+            expect(flashpointBody.game.mode_specific_data).toMatchObject({
+              hero_names: expect.any(Array),
+              team_score: expect.any(Number),
+              enemy_score: expect.any(Number),
+            });
+
+            const { body: hybridBody } = await request(app)
+              .get(`/api/games/nova/${hybridGame.game_id}`)
+              .expect(200);
+
+            expect(Array.isArray(hybridBody.game.mode_specific_data)).toBe(
+              true
+            );
+            hybridBody.game.mode_specific_data.forEach((round) => {
+              expect(round).toMatchObject({
+                round_number: expect.any(Number),
+                starting_side: expect.any(String),
+                hero_names: expect.any(Array),
+                score: expect.any(Number),
+                sub_score: expect.any(String),
+              });
+            });
+
+            const { body: pushBody } = await request(app)
+              .get(`/api/games/nova/${pushGame.game_id}`)
+              .expect(200);
+
+            expect(pushBody.game.mode_specific_data).toMatchObject({
+              hero_names: expect.any(Array),
+              team_score: expect.any(Number),
+              team_distance: expect.any(String),
+              enemy_score: expect.any(Number),
+              enemy_distance: expect.any(String),
+            });
+          });
+
+          test("400: should return bad request if game_id is not a number", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova/not-a-number")
+              .expect(400);
+
+            expect(body.message).toBe("Bad request");
+          });
+
+          test("404: should return not found if game_id does not exist", async () => {
+            const { body } = await request(app)
+              .get("/api/games/nova/999999")
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+
+          test("404: should return not found if game exists but belongs to different user", async () => {
+            const { body: gamesBody } = await request(app).get(
+              "/api/games/nova"
+            );
+            const gameId = gamesBody.games[0].game_id;
+
+            const { body } = await request(app)
+              .get(`/api/games/omby/${gameId}`)
+              .expect(404);
+
+            expect(body.message).toBe("Not found");
+          });
+
+          test("200: should return mode-specific data based on game type", async () => {
+            const { body: gamesBody } = await request(app).get(
+              "/api/games/nova"
+            );
+
+            const controlGame = gamesBody.games.find(
+              (game) => game.map_name === "Illios"
+            );
+            const pushGame = gamesBody.games.find(
+              (game) => game.map_name === "Colosseo"
+            );
+
+            const { body: controlBody } = await request(app)
+              .get(`/api/games/nova/${controlGame.game_id}`)
+              .expect(200);
+
+            expect(controlBody.game.mode_specific_data).toHaveLength(2);
+            controlBody.game.mode_specific_data.forEach((round) => {
+              expect(round).toMatchObject({
+                round_number: expect.any(Number),
+                submap_name: expect.any(String),
+                hero_names: expect.any(Array),
+                team_score: expect.any(Number),
+                enemy_score: expect.any(Number),
+              });
+            });
+
+            const { body: pushBody } = await request(app)
+              .get(`/api/games/nova/${pushGame.game_id}`)
+              .expect(200);
+
+            expect(pushBody.game.mode_specific_data).toMatchObject({
+              hero_names: expect.any(Array),
+              team_score: expect.any(Number),
+              team_distance: expect.any(String),
+              enemy_score: expect.any(Number),
+              enemy_distance: expect.any(String),
+            });
           });
         });
       });

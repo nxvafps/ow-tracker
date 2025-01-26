@@ -313,6 +313,219 @@ class GameModel {
 
     return rows;
   }
+
+  async getGameById(userName, gameId) {
+    // Get base game data
+    let query = `
+      SELECT 
+        games.*,
+        users.user_name,
+        roles.role_name,
+        maps.map_name,
+        maps.game_mode
+      FROM games
+      JOIN users ON games.user_id = users.user_id 
+      JOIN roles ON games.role_id = roles.role_id
+      JOIN maps ON games.map_id = maps.map_id
+      WHERE LOWER(users.user_name) = LOWER($1)
+      AND games.game_id = $2
+    `;
+
+    const { rows } = await db.query(query, [userName, gameId]);
+
+    if (!rows.length) {
+      throw AppError.notFound("Not found");
+    }
+
+    const game = rows[0];
+
+    let modeSpecificData;
+    switch (game.game_mode) {
+      case "Clash": {
+        const clashQuery = `
+          SELECT 
+            cg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM clash_games cg
+          LEFT JOIN heroes h1 ON cg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON cg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON cg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+        `;
+        const { rows: clashRows } = await db.query(clashQuery, [gameId]);
+        if (clashRows.length) {
+          const heroNames = [
+            clashRows[0].hero_1_name,
+            clashRows[0].hero_2_name,
+            clashRows[0].hero_3_name,
+          ].filter(Boolean);
+          modeSpecificData = {
+            hero_names: heroNames,
+            team_score: clashRows[0].team_score,
+            enemy_score: clashRows[0].enemy_score,
+          };
+        }
+        break;
+      }
+      case "Control": {
+        const controlQuery = `
+          SELECT 
+            cg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM control_games cg
+          LEFT JOIN heroes h1 ON cg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON cg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON cg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+          ORDER BY round_number
+        `;
+        const { rows: controlRows } = await db.query(controlQuery, [gameId]);
+        if (controlRows.length) {
+          modeSpecificData = controlRows.map((round) => ({
+            round_number: round.round_number,
+            submap_name: round.submap_name,
+            hero_names: [
+              round.hero_1_name,
+              round.hero_2_name,
+              round.hero_3_name,
+            ].filter(Boolean),
+            team_score: round.team_score,
+            enemy_score: round.enemy_score,
+          }));
+        }
+        break;
+      }
+      case "Escort": {
+        const escortQuery = `
+          SELECT 
+            eg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM escort_games eg
+          LEFT JOIN heroes h1 ON eg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON eg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON eg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+          ORDER BY round_number
+        `;
+        const { rows: escortRows } = await db.query(escortQuery, [gameId]);
+        if (escortRows.length) {
+          modeSpecificData = escortRows.map((round) => ({
+            round_number: round.round_number,
+            starting_side: round.starting_side,
+            hero_names: [
+              round.hero_1_name,
+              round.hero_2_name,
+              round.hero_3_name,
+            ].filter(Boolean),
+            score: round.score,
+            sub_score: round.sub_score,
+          }));
+        }
+        break;
+      }
+      case "Flashpoint": {
+        const flashpointQuery = `
+          SELECT 
+            fg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM flashpoint_games fg
+          LEFT JOIN heroes h1 ON fg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON fg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON fg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+        `;
+        const { rows: flashpointRows } = await db.query(flashpointQuery, [
+          gameId,
+        ]);
+        if (flashpointRows.length) {
+          const heroNames = [
+            flashpointRows[0].hero_1_name,
+            flashpointRows[0].hero_2_name,
+            flashpointRows[0].hero_3_name,
+          ].filter(Boolean);
+          modeSpecificData = {
+            hero_names: heroNames,
+            team_score: flashpointRows[0].team_score,
+            enemy_score: flashpointRows[0].enemy_score,
+          };
+        }
+        break;
+      }
+      case "Hybrid": {
+        const hybridQuery = `
+          SELECT 
+            hg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM hybrid_games hg
+          LEFT JOIN heroes h1 ON hg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON hg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON hg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+          ORDER BY round_number
+        `;
+        const { rows: hybridRows } = await db.query(hybridQuery, [gameId]);
+        if (hybridRows.length) {
+          modeSpecificData = hybridRows.map((round) => ({
+            round_number: round.round_number,
+            starting_side: round.starting_side,
+            hero_names: [
+              round.hero_1_name,
+              round.hero_2_name,
+              round.hero_3_name,
+            ].filter(Boolean),
+            score: round.score,
+            sub_score: round.sub_score,
+          }));
+        }
+        break;
+      }
+      case "Push": {
+        const pushQuery = `
+          SELECT 
+            pg.*,
+            h1.hero_name as hero_1_name,
+            h2.hero_name as hero_2_name,
+            h3.hero_name as hero_3_name
+          FROM push_games pg
+          LEFT JOIN heroes h1 ON pg.hero_id_1 = h1.hero_id
+          LEFT JOIN heroes h2 ON pg.hero_id_2 = h2.hero_id
+          LEFT JOIN heroes h3 ON pg.hero_id_3 = h3.hero_id
+          WHERE game_id = $1
+        `;
+        const { rows: pushRows } = await db.query(pushQuery, [gameId]);
+        if (pushRows.length) {
+          const heroNames = [
+            pushRows[0].hero_1_name,
+            pushRows[0].hero_2_name,
+            pushRows[0].hero_3_name,
+          ].filter(Boolean);
+          modeSpecificData = {
+            hero_names: heroNames,
+            team_score: pushRows[0].team_score,
+            team_distance: pushRows[0].team_distance,
+            enemy_score: pushRows[0].enemy_score,
+            enemy_distance: pushRows[0].enemy_distance,
+          };
+        }
+        break;
+      }
+    }
+
+    return {
+      ...game,
+      mode_specific_data: modeSpecificData,
+    };
+  }
 }
 
 module.exports = new GameModel();

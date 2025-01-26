@@ -53,6 +53,25 @@ class GameController {
       next(error);
     }
   }
+
+  async getGameById(req, res, next) {
+    try {
+      const { user_name, game_id } = req.params;
+
+      if (!isNaN(user_name)) {
+        throw AppError.badRequest("Bad request");
+      }
+
+      if (isNaN(game_id)) {
+        throw AppError.badRequest("Bad request");
+      }
+
+      const game = await gameModel.getGameById(user_name, parseInt(game_id));
+      res.json({ game });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new GameController();
