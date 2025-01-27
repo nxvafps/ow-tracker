@@ -12,7 +12,13 @@
     "dev": "nodemon app/listen.js",
     "test": "jest",
     "setup-db": "psql -f ./app/db/setup-dbs.sql",
-    "seed": "node app/db/run-seed.js"
+    "seed": "node app/db/run-seed.js",
+    "docker-setup": "docker-compose up -d && docker-compose exec app npm run setup-db && docker-compose exec app npm run seed",
+    "docker-dev": "docker-compose up -d",
+    "docker-reseed": "docker-compose exec app npm run seed",
+    "docker-stop": "docker compose down",
+    "docker-logs": "docker compose logs -f",
+    "docker-clean": "docker compose down -v --rmi all"
   },
   "repository": {
     "type": "git",

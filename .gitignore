@@ -1,4 +1,25 @@
 *.md
+
+# Docker volumes
+postgres_data/
+
+# Environment files
 .env*
+
+# Node modules
 node_modules/
+
+# IDE settings
 .vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+dist/
+build/
+
+# Docker environment files
+.docker-env
