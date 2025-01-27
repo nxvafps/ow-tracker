@@ -16,7 +16,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: sh -c "npm run setup-db && npm run seed && npm run dev"
+    command: npm run dev
 
   db:
     image: postgres:15-alpine
