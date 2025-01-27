@@ -18,7 +18,13 @@
     "docker-reseed": "docker-compose exec app npm run seed",
     "docker-stop": "docker compose down",
     "docker-logs": "docker compose logs -f",
-    "docker-clean": "docker compose down -v --rmi all"
+    "docker-clean": "docker compose down -v --rmi all",
+    "docker-rebuild": "docker compose build --no-cache && docker compose up -d",
+    "docker-ps": "docker compose ps",
+    "docker-shell": "docker compose exec app sh",
+    "docker-logs:app": "docker compose logs -f app",
+    "docker-logs:db": "docker compose logs -f db",
+    "docker-test": "docker compose exec app npm test"
   },
   "repository": {
     "type": "git",
