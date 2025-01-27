@@ -1044,9 +1044,9 @@ describe("/api", () => {
             expect(game).toMatchObject({
               game_id: expect.any(Number),
               season: expect.any(Number),
-              user_id: expect.any(Number),
-              role_id: expect.any(Number),
-              map_id: expect.any(Number),
+              user_name: expect.any(String),
+              role_name: expect.any(String),
+              map_name: expect.any(String),
               team_score: expect.any(Number),
               enemy_score: expect.any(Number),
               result: expect.any(String),

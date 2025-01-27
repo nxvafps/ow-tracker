@@ -266,10 +266,15 @@ class GameModel {
     const { season, role, map_name, result } = queries;
     let query = `
       SELECT 
-        games.*,
+        games.game_id,
+        games.season,
         users.user_name,
         roles.role_name,
-        maps.map_name
+        maps.map_name,
+        games.team_score,
+        games.enemy_score,
+        games.result,
+        games.sr_change
       FROM games
       JOIN users ON games.user_id = users.user_id
       JOIN roles ON games.role_id = roles.role_id
@@ -318,11 +323,16 @@ class GameModel {
     // Get base game data
     let query = `
       SELECT 
-        games.*,
+        games.game_id,
+        games.season,
         users.user_name,
         roles.role_name,
         maps.map_name,
-        maps.game_mode
+        maps.game_mode,
+        games.team_score,
+        games.enemy_score,
+        games.result,
+        games.sr_change
       FROM games
       JOIN users ON games.user_id = users.user_id 
       JOIN roles ON games.role_id = roles.role_id
